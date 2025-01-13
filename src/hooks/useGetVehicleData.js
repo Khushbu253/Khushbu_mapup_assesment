@@ -7,8 +7,19 @@ const useGetVehicleData = () => {
   useEffect(() => {
     const fetchCSV = async () => {
       try {
-        const response = await fetch('../../public/Electric_Vehicle_Population_Data.csv'); // Update the path as needed
-        const text = await response.text();
+        // const response = await fetch('../../assets/Electric_Vehicle_Population_Data.csv'); // Update the path as needed
+        // const text = await response.text();
+        // console.log(text,"read text")
+       const text= fetch('../assets/Electric_Vehicle_Population_Data.csv')
+          .then((response) => response.blob()) // Convert to Blob
+          .then((blob) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              console.log("CSV content:", e.target.result);
+            };
+            reader.readAsText(blob);
+          })
+          .catch((error) => console.error("Error:", error));
         Papa.parse(text, {
           header: true, // Automatically converts CSV rows to JSON objects
           skipEmptyLines: true,

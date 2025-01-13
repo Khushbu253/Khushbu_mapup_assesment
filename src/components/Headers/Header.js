@@ -24,6 +24,8 @@ import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 import data from '../../assets/csvjson.json'
 
 const Header = () => {
+
+  const jsonData=useGetVehicleData()
   const totalUsers=data.length
   const getCities=()=>{
     const citydata=data.map((d)=>d.City)
@@ -45,7 +47,7 @@ const Header = () => {
     return vehicles
   }
   const totalBrands=getBrands()
-  
+  console.log(jsonData,"json dataaaaaaaa")
   return (
     <>
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">

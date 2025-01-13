@@ -36,6 +36,12 @@ import {
   Container,
   Row,
   Col,
+  Modal,
+  Typography,
+  Box,
+  ModalFooter,
+  ModalBody,
+  ModalHeader,
 } from "reactstrap";
 
 // core components
@@ -49,8 +55,14 @@ import data from '../assets/csvjson.json'
 import Header from "components/Headers/Header.js";
 
 const Index = (props) => {
+
+  const [isInfo,setIsInfo]=useState(false)
+  const [currentModelData,setCurrentModelData]=useState([])
   const [activeNav, setActiveNav] = useState(1);
   const [chartExample1Data, setChartExample1Data] = useState("data1");
+
+
+  const toggle = () => setIsInfo(!isInfo);
 
   if (window.Chart) {
     parseOptions(Chart, chartOptions());
@@ -156,6 +168,36 @@ const Index = (props) => {
   }
 
   const countyTableData=topSellingCounties()
+
+  const handleIconClick=(e,d)=>{
+      e.preventDefault()
+      setIsInfo(true)
+      const clickedVehicleData=data.filter((record)=>record.Make===d.vehicleName)
+      const modelsData=clickedVehicleData.map((d)=>d.Model)
+      const models=[...new Set(modelsData)]
+      const topModels=models.map((m)=>({modelName:m,sales:0,per:0}))
+      data.map((d)=>{
+        topModels.map((data)=>{
+          if(data.modelName===d.Model){
+            data.sales=data.sales+1
+          }
+        })
+      })
+      topModels.sort((a,b)=>b.sales-a.sales)
+
+      //add percentage
+      const totalSales=d.sales
+      data.map((d)=>{
+        topModels.map((data)=>{
+          if(data.modelName===d.Model){
+            data.per=(data.sales*100/totalSales).toFixed(2)
+          }
+        })
+      })
+      setCurrentModelData({vehicleName:d.vehicleName,data:topModels})
+      console.log(topModels,"clicked data")
+      
+  }
   return (
     <>
       <Header />
@@ -215,15 +257,17 @@ const Index = (props) => {
                 <Row className="align-items-center">
                   <div className="col">
                     <h3 className="mb-0">Top Selling Vehicles</h3>
+                   
                   </div>
                   <div className="col text-right">
-                    <Button
-                      color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
-                      size="sm"
-                    >
-                    </Button>
+                      <Button
+                        color="primary"
+                        href="#pablo"
+                        onClick={(e) => e.preventDefault()}
+                        size="sm"
+                      >
+                      </Button>
+                       {/* <div><i class="fa-solid fa-circle-info" ></i> <p>for Model Information</p></div> */}
                   </div>
                 </Row>
               </CardHeader>
@@ -238,7 +282,9 @@ const Index = (props) => {
                 <tbody>
                   {topSellingTableData.slice(0,10).map((data)=>
                   <tr>
-                  <th scope="row">{data.vehicleName}</th>
+                  <th scope="row">{data.vehicleName}{"  "} <a href="#" onClick={(e)=>handleIconClick(e,data)}>
+                  <i class="fa-solid fa-circle-info" ></i>
+                    </a></th>
                   <td>{data.sales}</td>
                   
                   <td>
@@ -296,6 +342,64 @@ const Index = (props) => {
             </Card>
           </Col>
         </Row>
+        <Modal isOpen={isInfo} toggle={toggle} size="xl">
+        <ModalHeader toggle={toggle}>{currentModelData.vehicleName} Sales Information</ModalHeader>
+        <ModalBody>
+        <Col xl="12">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h3 className="mb-0">{currentModelData.vehicleName} Models</h3>
+                  </div>
+                  <div className="col text-right">
+                    <Button
+                      color="primary"
+                      href="#pablo"
+                      onClick={(e) => e.preventDefault()}
+                      size="sm"
+                    >
+                    </Button>
+                  </div>
+                </Row>
+              </CardHeader>
+              <Table className="align-items-center table-flush" responsive>
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col">Model Name</th>
+                    <th scope="col">Sales</th>
+                    <th scope="col">Percentage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentModelData?.data?.map((d)=>
+                  <tr>
+                  <th scope="row">{d.modelName}</th>
+                  <td>{d.sales}</td>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <span className="mr-2">{d.per}</span>
+                       <div>
+                        <Progress
+                          max="100"
+                          value={d.per}
+                          barClassName="bg-gradient-danger"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                </tr> )}
+                </tbody>
+              </Table>
+            </Card>
+          </Col>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggle}>
+            Close
+          </Button>
+        </ModalFooter>
+      </Modal>
       </Container>
     </>
   );
