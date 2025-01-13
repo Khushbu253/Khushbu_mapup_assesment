@@ -2,4 +2,8 @@
 /node_modules
 package-lock.json
 /build
+ISSUE_TEMPLATE.md
+genezio.yaml
+LICENSE
+CHANGELOG.md
 .eslintcache
